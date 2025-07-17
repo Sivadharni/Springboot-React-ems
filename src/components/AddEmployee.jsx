@@ -1,88 +1,119 @@
 import axios from "axios";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-const AddEmployee = () => {
+const AddEmployees= () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [userName, setUsername] = useState("");
-  const [roleNames, setRoles] = useState("");
-  const navigate = useNavigate();
-  async function addNewEmployee(e) {
-    e.preventDefault();
-    const roleArray = roleNames.split(",").map((role) => role.trim());
-    console.log(roleArray);
-    const req = await axios.post("https://springboot-securitycases-hosting-1.onrender.com/api/auth/register", {
-      name,
-      email,
-      password,
-      userName,
-      roleNames: roleArray,
-    });
-    console.log(req);
-    if (req.data) {
-      alert(req.data);
-      navigate("/")
+  const [roleName, setRoles] = useState("");
 
-    } else {
-      alert("Error during Sign up");
+  const navigate = useNavigate();
+  const token = localStorage.getItem("token");
+  const role = localStorage.getItem("role");
+  useEffect(() => {
+    if (!token || role !== "ROLE_ADMIN") {
+      navigate("/");
     }
+  }, []);
+  async function addNewEmployee(e) {
+  e.preventDefault();
+  const roleArray = roleName.split(",").map((role) => role.trim());
+  try {
+    const req = await axios.post(
+      "https://springboot-securitycases-hosting-1.onrender.com/employee/add",
+      {
+        name,
+        email,
+        password,
+        userName,
+        roleName: roleArray,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    alert(req.data || "Employee added successfully!");
+  } catch (error) {
+    console.error("Error adding employee:", error);
+    alert("Error during adding the employee");
   }
+}
+
+
   return (
-    <section>
-      <h2>Add an Employee</h2>
-      <div>
-        <form onSubmit={addNewEmployee}>
-          <label htmlFor="name">Employee Name : </label>
-          <input
-            type="text"
-            id="name"
-            name={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-          <br />
-          <br />
-          <label htmlFor="email">Email : </label>
-          <input
-            type="email"
-            id="name"
-            name={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <br />
-          <br />
-          <label htmlFor="username">Username :</label>
-          <input
-            type="text"
-            id="name"
-            name={userName}
-            onChange={(e) => setUsername(e.target.value)}
-          />
-          <br />
-          <br />
-          <label htmlFor="password">Password : </label>
-          <input
-            type="password"
-            id="name"
-            name={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          <br />
-          <br />
-          <label htmlFor="roleNames">Roles : </label>
-          <input
-            type="text"
-            id="roleNames"
-            name={roleNames}
-            onChange={(e) => setRoles(e.target.value)}
-          />
-          <br />
-          <br />
-          <button type="submit">Add Employee</button>
-        </form>
+    <div className="container mt-5">
+      <div className="card mx-auto shadow" style={{ maxWidth: "500px" }}>
+        <div className="card-body">
+          <h3 className="text-center mb-4"> Form</h3>
+          <form onSubmit={addNewEmployee}>
+            <div className="mb-3">
+              <label className="form-label">Employee Name</label>
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Enter name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </div>
+
+            <div className="mb-3">
+              <label className="form-label">Email</label>
+              <input
+                type="email"
+                className="form-control"
+                placeholder="Enter email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
+
+            <div className="mb-3">
+              <label className="form-label">Username</label>
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Enter username"
+                value={userName}
+                onChange={(e) => setUsername(e.target.value)}
+              />
+            </div>
+
+            <div className="mb-3">
+              <label className="form-label">Password</label>
+              <input
+                type="password"
+                className="form-control"
+                placeholder="Enter password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
+
+            <div className="mb-3">
+              <label className="form-label">Roles</label>
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Enter roles (comma-separated)"
+                value={roleName}
+                onChange={(e) => setRoles(e.target.value)}
+              />
+            </div>
+
+            <button type="submit" className="btn btn-primary w-100">
+              ADD Employee
+            </button>
+          </form>
+        
+        </div>
       </div>
-    </section>
+    </div>
   );
 };
-export default AddEmployee;
+
+export default AddEmployees;
