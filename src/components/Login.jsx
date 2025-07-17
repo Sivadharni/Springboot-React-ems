@@ -1,79 +1,88 @@
 import { useState } from "react";
-import axios from "axios";import { useNavigate } from "react-router-dom";
-import "bootstrap/dist/css/bootstrap.min.css";
-const Login = ({ onLoginSuccess = () => {} }) => {
+import axios from "axios";
+import { Link, useNavigate } from "react-router-dom";
+
+const Login = () => {
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
-
   async function handleLogin(event) {
     event.preventDefault();
     try {
-      const response = await axios.post("http://localhost:10000/api/auth/login", {
+      const request = await axios.post("https://springboot-securitycases-hosting-1.onrender.com/api/auth/login", {
         userName,
         password,
       });
-
-      const { token, userName: name, roles } = response.data;
-
+      const token = request.data.token;
+      const role = request.data.roles;
       localStorage.setItem("token", token);
-      localStorage.setItem("userName", name);
-      localStorage.setItem("roles", JSON.stringify(roles));
-
+      localStorage.setItem("role", role);
+      console.log(request.data.username);
+      console.log(request.data.roles);
+      console.log(token);
       alert("Login Successful");
-
-      onLoginSuccess(); // ✅ safe even if not passed
-      navigate("/");    // ✅ navigate to home
+      navigate("/employees");
     } catch (e) {
       console.log("Login Error", e);
-      alert("Invalid Credentials");
+      alert("Invalid Cred");
     }
+    console.log("Form Submitted");
   }
+  return (
+    <div className="container">
+      <br /> <br />
+      <div className="row">
+        <div className="col-md-6 offset-md-3">
+          <div className="card">
+            <div className="card-header">
+              <h2 className="text-center"> Login Form </h2>
+            </div>
 
-  return (<div
-      className="d-flex justify-content-center align-items-center vh-100"
-      style={{
-        background: "linear-gradient(90deg, #74c0fc, #b197fc)",
-      }}
-    >
-      <div className="bg-white p-4 rounded shadow" style={{ width: "350px" }}>
-        <h2 className="text-center text-danger mb-4">Login</h2>
-        <form onSubmit={handleLogin}>
-          <div className="mb-3">
-            <label htmlFor="userName" className="form-label">User Name</label>
-            <input
-              id="userName"
-              name="userName"
-              type="text"
-              className="form-control"
-              value={userName}
-              onChange={(e) => setUserName(e.target.value)}
-              required
-            />
+            <div className="card-body">
+              <form>
+                <div className="row mb-3">
+                  <label className="col-md-3 control-label"> Username</label>
+                  <div className="col-md-9">
+                    <input
+                      type="text"
+                      name="username"
+                      className="form-control"
+                      placeholder="Enter username"
+                      value={userName}
+                      onChange={(e) => setUserName(e.target.value)}
+                    ></input>
+                  </div>
+                </div>
+
+                <div className="row mb-3">
+                  <label className="col-md-3 control-label"> Password </label>
+                  <div className="col-md-9">
+                    <input
+                      type="password"
+                      name="password"
+                      className="form-control"
+                      placeholder="Enter password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                    ></input>
+                  </div>
+                </div>
+
+                <div className="form-group mb-3">
+                  <button
+                    className="btn btn-primary"
+                    onClick={(e) => handleLogin(e)}
+                  >
+                    Submit
+                  </button>
+                </div>
+              </form>
+              <p>Create an account??<Link to='/register'>Register</Link></p>
+            </div>
           </div>
-          <div className="mb-3">
-            <label htmlFor="password" className="form-label">Password</label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              className="form-control"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
-          <button
-            type="submit"
-            className="btn w-100 fw-bold text-white"
-            style={{ background: "linear-gradient(90deg, #74c0fc, #b197fc)" }}
-          >
-            Login
-          </button>
-        </form>
+        </div>
       </div>
     </div>
   );
 };
-
 export default Login;
